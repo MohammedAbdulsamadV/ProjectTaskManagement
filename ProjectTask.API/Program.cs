@@ -14,32 +14,18 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-    var configuration = builder.Configuration;
+        var configuration = builder.Configuration;
+    
+        builder.Services.AddControllers();
 
-// ========================
-// 📌 Controllers
-// ========================
-    builder.Services.AddControllers();
 
-// ========================
-// 📌 Swagger
-// ========================
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
 
-// ========================
-// 📌 Application Layer DI
-// ========================
-    builder.Services.AddApplication();
+        builder.Services.AddApplication();
 
-// ========================
-// 📌 Infrastructure Layer DI (EF + Redis + Repos)
-// ========================
-    builder.Services.AddInfrastructure(configuration);
+        builder.Services.AddInfrastructure(configuration);
 
-// ========================
-// 📌 Database (if not inside Infrastructure)
-// ========================
         builder.Services.AddDbContext<AppDbContext>(options =>
         {
             options.UseSqlServer(
@@ -52,64 +38,52 @@ public class Program
                         errorNumbersToAdd: null);
                 });
         });
-// ========================
-// 📌 JWT Authentication
-// ========================
-    var jwtSettings = configuration.GetSection("Jwt");
+        var jwtSettings = configuration.GetSection("Jwt");
 
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
 
-            ValidIssuer = jwtSettings["Issuer"],
-            ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtSettings["Key"]!)
             )
         };
+    }); 
+        builder.Services.AddAuthorization();
+
+
+        builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = configuration["Redis:Connection"];
     });
 
-// ========================
-// 📌 Authorization
-// ========================
-builder.Services.AddAuthorization();
+    var app = builder.Build();
 
-// ========================
-// 📌 Redis (if not inside Infrastructure)
-// ========================
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = configuration["Redis:Connection"];
-});
 
-var app = builder.Build();
 
-// ========================
-// 📌 Middleware Pipeline
-// ========================
+    app.UseMiddleware<ExceptionMiddleware>();
 
-// Global Exception Handling
-app.UseMiddleware<ExceptionMiddleware>();
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    app.UseHttpsRedirection();
 
-app.UseHttpsRedirection();
+    app.UseAuthentication();
+    app.UseAuthorization();
 
-app.UseAuthentication();
-app.UseAuthorization();
+    app.MapControllers();
 
-app.MapControllers();
-
-app.Run();
+    app.Run();
     }
 }

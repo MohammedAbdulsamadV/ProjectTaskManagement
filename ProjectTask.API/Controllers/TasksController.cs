@@ -10,7 +10,7 @@ namespace ProjectTask.API.Controllers;
 
 [ApiController]
 [Route("api/tasks")]
-[Authorize]
+//[Authorize]
 public class TasksController : ControllerBase
 {
     private readonly IMediator _mediator;

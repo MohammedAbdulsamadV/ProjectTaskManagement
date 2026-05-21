@@ -31,10 +31,8 @@ public class GetAllProjectsQueryHandler
         GetAllProjectsQuery request,
         CancellationToken cancellationToken)
     {
-        // 🔑 unique cache key per user
         var cacheKey = $"projects_user_{_currentUser.UserId}";
 
-        // ✅ Try cache first
         var cachedProjects =
             await _cacheService.GetAsync<List<ProjectDto>>(cacheKey);
 
@@ -44,7 +42,6 @@ public class GetAllProjectsQueryHandler
                 .SuccessResult(cachedProjects, "Projects retrieved from cache");
         }
 
-        // ❌ Cache miss → DB
         var projects = await _repository.GetAllAsync();
 
         var userProjects = projects
@@ -53,7 +50,6 @@ public class GetAllProjectsQueryHandler
 
         var result = _mapper.Map<List<ProjectDto>>(userProjects);
 
-        // 💾 Store in Redis
         await _cacheService.SetAsync(
             cacheKey,
             result,

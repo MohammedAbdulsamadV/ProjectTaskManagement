@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 using ProjectTask.Application.Interfaces;
+using StackExchange.Redis;
 
 namespace ProjectTask.Infrastructure.Caching;
 
@@ -17,29 +18,19 @@ public class RedisCacheService : ICacheService
     {
         var data = await _cache.GetStringAsync(key);
 
-        if (data == null)
-            return default;
-
-        return JsonSerializer.Deserialize<T>(data);
+        return data == null ? default : JsonSerializer.Deserialize<T>(data);
     }
 
-    public async Task SetAsync<T>(
-        string key,
-        T value,
-        TimeSpan expiration)
+    public async Task SetAsync<T>(string key, T value, TimeSpan expiration)
     {
         var options = new DistributedCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = expiration
         };
 
-        var json = JsonSerializer.Serialize(value);
-
-        await _cache.SetStringAsync(key, json, options);
+        await _cache.SetStringAsync(key, JsonSerializer.Serialize(value), options);
     }
 
-    public async Task RemoveAsync(string key)
-    {
-        await _cache.RemoveAsync(key);
-    }
+    public Task RemoveAsync(string key)
+        => _cache.RemoveAsync(key);
 }

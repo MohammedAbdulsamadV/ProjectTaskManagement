@@ -33,17 +33,14 @@ public class UpdateProjectCommandHandler
     {
         try
         {
-            // 🔍 Get project
             var project = await _repository.GetByIdAsync(request.Model.Id);
 
             if (project == null)
                 return ApiResponse<ProjectDto>.Fail("Project not found");
 
-            // 🔐 Security check (very important)
             if (project.UserId != _currentUser.UserId)
                 return ApiResponse<ProjectDto>.Fail("Unauthorized access");
 
-            // ✏️ Update fields
             project.Name = request.Model.Name;
             project.Description = request.Model.Description;
 

@@ -6,6 +6,7 @@ using ProjectTask.Infrastructure.Caching;
 using ProjectTask.Infrastructure.Identity;
 using ProjectTask.Infrastructure.Persistence;
 using ProjectTask.Infrastructure.Repositories;
+using StackExchange.Redis;
 using ICacheService = ProjectTask.Application.Interfaces.ICacheService;
 
 namespace ProjectTask.Infrastructure;
@@ -16,21 +17,28 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // DbContext
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-        // HttpContext
         services.AddHttpContextAccessor();
 
-        // Repositories
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // Services
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IJwtService, JwtService>();
-        
+        services.AddSingleton<IConnectionMultiplexer>(sp =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+
+            var options = ConfigurationOptions.Parse(config["Redis:Connection"]);
+
+            options.ConnectRetry = 5;
+            options.ConnectTimeout = 10000;
+            options.AbortOnConnectFail = false;
+
+            return ConnectionMultiplexer.Connect(options);
+        });
         services.AddStackExchangeRedisCache(options =>
         {
             options.Configuration = configuration["Redis:Connection"];

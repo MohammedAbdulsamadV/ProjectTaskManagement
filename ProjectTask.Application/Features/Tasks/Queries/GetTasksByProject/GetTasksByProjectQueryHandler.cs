@@ -35,11 +35,9 @@ public class GetTasksByProjectQueryHandler
         GetTasksByProjectQuery request,
         CancellationToken cancellationToken)
     {
-        // 🔑 Cache key
         var cacheKey =
             $"tasks_project_{request.ProjectId}_user_{_currentUser.UserId}";
 
-        // ✅ Try Redis first
         var cachedTasks =
             await _cacheService.GetAsync<List<TaskDto>>(cacheKey);
 
@@ -49,7 +47,6 @@ public class GetTasksByProjectQueryHandler
                 .SuccessResult(cachedTasks, "Tasks retrieved from cache");
         }
 
-        // ✅ Validate project ownership
         var project = await _projectRepo.GetByIdAsync(request.ProjectId);
 
         if (project == null)
@@ -60,7 +57,6 @@ public class GetTasksByProjectQueryHandler
             return ApiResponse<List<TaskDto>>
                 .Fail("Unauthorized access");
 
-        // ❌ Cache miss → DB
         var tasks = await _taskRepo.GetAllAsync();
 
         var projectTasks = tasks
@@ -69,7 +65,6 @@ public class GetTasksByProjectQueryHandler
 
         var result = _mapper.Map<List<TaskDto>>(projectTasks);
 
-        // 💾 Store in Redis
         await _cacheService.SetAsync(
             cacheKey,
             result,
