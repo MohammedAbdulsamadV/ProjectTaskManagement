@@ -13,38 +13,21 @@ public class GetAllProjectsQueryHandler
     private readonly IRepository<Project> _repository;
     private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUser;
-    private readonly ICacheService _cacheService;
 
     public GetAllProjectsQueryHandler(
         IRepository<Project> repository,
         IMapper mapper,
-        ICurrentUserService currentUser,
-        ICacheService cacheService)
+        ICurrentUserService currentUser)
     {
         _repository = repository;
         _mapper = mapper;
         _currentUser = currentUser;
-        _cacheService = cacheService;
     }
 
     public async Task<ApiResponse<List<ProjectDto>>> Handle(
         GetAllProjectsQuery request,
         CancellationToken cancellationToken)
     {
-        // 🔑 unique cache key per user
-        var cacheKey = $"projects_user_{_currentUser.UserId}";
-
-        // ✅ Try cache first
-        var cachedProjects =
-            await _cacheService.GetAsync<List<ProjectDto>>(cacheKey);
-
-        if (cachedProjects is not null)
-        {
-            return ApiResponse<List<ProjectDto>>
-                .SuccessResult(cachedProjects, "Projects retrieved from cache");
-        }
-
-        // ❌ Cache miss → DB
         var projects = await _repository.GetAllAsync();
 
         var userProjects = projects
@@ -52,12 +35,6 @@ public class GetAllProjectsQueryHandler
             .ToList();
 
         var result = _mapper.Map<List<ProjectDto>>(userProjects);
-
-        // 💾 Store in Redis
-        await _cacheService.SetAsync(
-            cacheKey,
-            result,
-            TimeSpan.FromMinutes(10));
 
         return ApiResponse<List<ProjectDto>>
             .SuccessResult(result, "Projects retrieved from database");

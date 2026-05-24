@@ -13,43 +13,22 @@ public class GetTasksByProjectQueryHandler
 {
     private readonly IRepository<Task> _taskRepo;
     private readonly IRepository<Project> _projectRepo;
-    private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUser;
-    private readonly ICacheService _cacheService;
 
     public GetTasksByProjectQueryHandler(
         IRepository<Task> taskRepo,
         IRepository<Project> projectRepo,
-        IMapper mapper,
-        ICurrentUserService currentUser,
-        ICacheService cacheService)
+        ICurrentUserService currentUser)
     {
         _taskRepo = taskRepo;
         _projectRepo = projectRepo;
-        _mapper = mapper;
         _currentUser = currentUser;
-        _cacheService = cacheService;
     }
 
     public async Task<ApiResponse<List<TaskDto>>> Handle(
         GetTasksByProjectQuery request,
         CancellationToken cancellationToken)
     {
-        // 🔑 Cache key
-        var cacheKey =
-            $"tasks_project_{request.ProjectId}_user_{_currentUser.UserId}";
-
-        // ✅ Try Redis first
-        var cachedTasks =
-            await _cacheService.GetAsync<List<TaskDto>>(cacheKey);
-
-        if (cachedTasks is not null)
-        {
-            return ApiResponse<List<TaskDto>>
-                .SuccessResult(cachedTasks, "Tasks retrieved from cache");
-        }
-
-        // ✅ Validate project ownership
         var project = await _projectRepo.GetByIdAsync(request.ProjectId);
 
         if (project == null)
@@ -60,22 +39,23 @@ public class GetTasksByProjectQueryHandler
             return ApiResponse<List<TaskDto>>
                 .Fail("Unauthorized access");
 
-        // ❌ Cache miss → DB
         var tasks = await _taskRepo.GetAllAsync();
 
         var projectTasks = tasks
             .Where(x => x.ProjectId == request.ProjectId)
             .ToList();
 
-        var result = _mapper.Map<List<TaskDto>>(projectTasks);
-
-        // 💾 Store in Redis
-        await _cacheService.SetAsync(
-            cacheKey,
-            result,
-            TimeSpan.FromMinutes(10));
+        var result = projectTasks.Select(task => new TaskDto
+        {
+            Id = task.Id,
+            Title = task.Title,
+            Description = task.Description,
+            DueDate = task.DueDate,
+            Priority = task.Priority.ToString(),
+            Status = task.Status.ToString(),
+        }).ToList();
 
         return ApiResponse<List<TaskDto>>
-            .SuccessResult(result, "Tasks retrieved from database");
+            .SuccessResult(result, "Tasks retrieved successfully");
     }
 }

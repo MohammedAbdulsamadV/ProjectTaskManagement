@@ -14,32 +14,22 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-    var configuration = builder.Configuration;
+        var configuration = builder.Configuration;
 
-// ========================
-// 📌 Controllers
-// ========================
-    builder.Services.AddControllers();
 
-// ========================
-// 📌 Swagger
-// ========================
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+        builder.Services.AddControllers();
 
-// ========================
-// 📌 Application Layer DI
-// ========================
-    builder.Services.AddApplication();
 
-// ========================
-// 📌 Infrastructure Layer DI (EF + Redis + Repos)
-// ========================
-    builder.Services.AddInfrastructure(configuration);
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
 
-// ========================
-// 📌 Database (if not inside Infrastructure)
-// ========================
+
+        builder.Services.AddApplication();
+
+
+        builder.Services.AddInfrastructure(configuration);
+
+
         builder.Services.AddDbContext<AppDbContext>(options =>
         {
             options.UseSqlServer(
@@ -52,64 +42,46 @@ public class Program
                         errorNumbersToAdd: null);
                 });
         });
-// ========================
-// 📌 JWT Authentication
-// ========================
-    var jwtSettings = configuration.GetSection("Jwt");
 
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
+        var jwtSettings = configuration.GetSection("Jwt");
+
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings["Issuer"],
+                    ValidAudience = jwtSettings["Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                     Encoding.UTF8.GetBytes(jwtSettings["Key"]!))
+                };
+                
+            });
+
+
+        builder.Services.AddAuthorization();
+        
+        var app = builder.Build();
+        
+        app.UseMiddleware<ExceptionMiddleware>();
+
+        if (app.Environment.IsDevelopment())
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
 
-            ValidIssuer = jwtSettings["Issuer"],
-            ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSettings["Key"]!)
-            )
-        };
-    });
+        app.UseHttpsRedirection();
 
-// ========================
-// 📌 Authorization
-// ========================
-builder.Services.AddAuthorization();
+        app.UseAuthentication();
+        app.UseAuthorization();
 
-// ========================
-// 📌 Redis (if not inside Infrastructure)
-// ========================
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = configuration["Redis:Connection"];
-});
+        app.MapControllers();
 
-var app = builder.Build();
-
-// ========================
-// 📌 Middleware Pipeline
-// ========================
-
-// Global Exception Handling
-app.UseMiddleware<ExceptionMiddleware>();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+        app.Run();
     }
 }

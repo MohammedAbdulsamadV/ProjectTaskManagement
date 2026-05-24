@@ -10,11 +10,9 @@ services:
       - "5001:8080"
     depends_on:
       - sqlserver
-      - redis
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=ProjectTaskDb;User Id=sa;Password=Your_password123;TrustServerCertificate=True
-      - Redis__Connection=redis:6379
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -26,11 +24,6 @@ services:
       - "1433:1433"
     volumes:
       - sql_data:/var/opt/mssql
-
-  redis:
-    image: redis:7
-    ports:
-      - "6379:6379"
 
 volumes:
   sql_data:

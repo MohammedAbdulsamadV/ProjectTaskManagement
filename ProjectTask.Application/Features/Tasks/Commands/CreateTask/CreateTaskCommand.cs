@@ -2,7 +2,7 @@ using MediatR;
 using ProjectTask.Application.Common.Models;
 using ProjectTask.Application.DTOs;
 
-namespace ProjectTask.Application.Features.Tasks.Commans.CreateTask;
+namespace ProjectTask.Application.Features.Tasks.Commands.CreateTask;
 
 public class CreateTaskCommand : IRequest<ApiResponse<TaskDto>>
 {

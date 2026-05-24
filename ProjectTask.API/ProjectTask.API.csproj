@@ -26,10 +26,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="ExceptionHandling\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\ProjectTask.Infrastructure\ProjectTask.Infrastructure.csproj" />
     </ItemGroup>
 

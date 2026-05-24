@@ -5,18 +5,18 @@ using ProjectTask.Application.DTOs;
 using ProjectTask.Application.Interfaces;
 using Task = ProjectTask.Domain.Entities.Task;
 
-namespace ProjectTask.Application.Features.Tasks.Commans.UpdateTaskStatus;
+namespace ProjectTask.Application.Features.Tasks.Commands.UpdateTaskStatus;
 
 public class UpdateTaskStatusCommandHandler 
     : IRequestHandler<UpdateTaskStatusCommand, ApiResponse<TaskDto>>
 {
-    private readonly IRepository<Task> _taskRepo;
+    private readonly ITaskRepository _taskRepo;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUser;
 
     public UpdateTaskStatusCommandHandler(
-        IRepository<Task> taskRepo,
+        ITaskRepository taskRepo,
         IUnitOfWork unitOfWork,
         IMapper mapper,
         ICurrentUserService currentUser)
@@ -31,20 +31,28 @@ public class UpdateTaskStatusCommandHandler
     {
         try
         {
-            var task = await _taskRepo.GetByIdAsync(request.Model.TaskId);
-
+            var task = await _taskRepo.GetTaskWithProjectAsync(request.Model.TaskId);
             if (task == null)
                 return ApiResponse<TaskDto>.Fail("Task not found");
 
             if (task.Project.UserId != _currentUser.UserId)
                 return ApiResponse<TaskDto>.Fail("Unauthorized access");
 
-            task.Status = (TaskStatus)request.Model.Status;
+            task.Status = request.Model.Status;
 
             _taskRepo.Update(task);
             await _unitOfWork.SaveChangesAsync();
 
-            var result = _mapper.Map<TaskDto>(task);
+            var result = new TaskDto
+            {
+                Id = task.Id,
+                Title = task.Title,
+                Description = task.Description,
+                DueDate = task.DueDate,
+                Priority = task.Priority.ToString(),
+                Status = task.Status.ToString(),
+               
+            };
 
             return ApiResponse<TaskDto>.SuccessResult(result, "Task status updated");
         }

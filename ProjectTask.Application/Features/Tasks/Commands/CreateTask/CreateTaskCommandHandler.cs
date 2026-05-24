@@ -4,9 +4,10 @@ using ProjectTask.Application.Common.Models;
 using ProjectTask.Application.DTOs;
 using ProjectTask.Application.Interfaces;
 using ProjectTask.Domain.Entities;
+using ProjectTask.Domain.Enums;
 using Task = ProjectTask.Domain.Entities.Task;
 
-namespace ProjectTask.Application.Features.Tasks.Commans.CreateTask;
+namespace ProjectTask.Application.Features.Tasks.Commands.CreateTask;
 
 public class CreateTaskCommandHandler 
     : IRequestHandler<CreateTaskCommand, ApiResponse<TaskDto>>
@@ -43,12 +44,27 @@ public class CreateTaskCommandHandler
             if (project.UserId != _currentUser.UserId)
                 return ApiResponse<TaskDto>.Fail("Unauthorized access to project");
 
-            var task = _mapper.Map<Task>(request.Model);
+            var task = new Task
+            {
+                Title = request.Model.Title,
+                Description = request.Model.Description,
+                DueDate = request.Model.DueDate,
+                Priority = (TaskPriority)request.Model.Priority,
+                ProjectId = request.Model.ProjectId,
+            };
 
             await _taskRepo.AddAsync(task);
             await _unitOfWork.SaveChangesAsync();
 
-            var result = _mapper.Map<TaskDto>(task);
+            var result = new TaskDto
+            {
+                Id = task.Id,
+                Title = task.Title,
+                Description = task.Description,
+                DueDate = task.DueDate,
+                Priority = task.Priority.ToString(),
+                Status = task.Status.ToString(),
+            };
 
             return ApiResponse<TaskDto>.SuccessResult(result, "Task created successfully");
         }

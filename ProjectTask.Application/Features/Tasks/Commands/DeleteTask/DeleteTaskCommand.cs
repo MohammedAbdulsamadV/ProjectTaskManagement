@@ -1,7 +1,7 @@
 using MediatR;
 using ProjectTask.Application.Common.Models;
 
-namespace ProjectTask.Application.Features.Tasks.Commans.DeleteTask;
+namespace ProjectTask.Application.Features.Tasks.Commands.DeleteTask;
 
 public class DeleteTaskCommand : IRequest<ApiResponse<bool>>
 {

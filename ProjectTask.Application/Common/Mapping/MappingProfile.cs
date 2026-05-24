@@ -11,15 +11,5 @@ public class MappingProfile : Profile
     {
         CreateMap<Project, ProjectDto>();
         CreateMap<CreateProjectDto, Project>();
-
-        CreateMap<Task, TaskDto>()
-            .ForMember(dest => dest.Status, 
-                opt =>
-                    opt.MapFrom(src => src.Status.ToString()))
-            .ForMember(dest => dest.Priority, 
-                opt => 
-                    opt.MapFrom(src => src.Status.ToString()));
-
-        CreateMap<CreateTaskDto, Task>();
     }
 }

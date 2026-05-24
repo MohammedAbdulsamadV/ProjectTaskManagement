@@ -32,33 +32,26 @@ public class CreateProjectCommandHandler : IRequestHandler<CreateProjectCommand,
     {
         try
         {
-            // 🧠 Validation (basic inside handler - or use FluentValidation)
             if (string.IsNullOrWhiteSpace(request.Model.Name))
                 return ApiResponse<ProjectDto>.Fail("Project name is required");
 
-            // 📦 Map DTO → Entity
             var project = _mapper.Map<Project>(request.Model);
 
-            // 🔐 Assign current user (IMPORTANT for multi-tenant)
             project.UserId = _currentUser.UserId;
 
             project.CreatedAt = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            // 💾 Save
             await _repository.AddAsync(project);
             await _unitOfWork.SaveChangesAsync();
 
-            // 📤 Map back to DTO
             var result = _mapper.Map<ProjectDto>(project);
 
-            // ✅ Response
             return ApiResponse<ProjectDto>.SuccessResult(
                 result,
                 "Project created successfully");
         }
         catch (Exception ex)
         {
-            // ❌ Safe error handling
             return ApiResponse<ProjectDto>.Fail(
                 $"Error occurred while creating project: {ex.Message}");
         }

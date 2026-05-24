@@ -1,9 +1,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProjectTask.Application.Features.Tasks.Commans.CreateTask;
-using ProjectTask.Application.Features.Tasks.Commans.DeleteTask;
-using ProjectTask.Application.Features.Tasks.Commans.UpdateTaskStatus;
+using ProjectTask.Application.Features.Tasks.Commands.CreateTask;
+using ProjectTask.Application.Features.Tasks.Commands.DeleteTask;
+using ProjectTask.Application.Features.Tasks.Commands.UpdateTaskStatus;
 using ProjectTask.Application.Features.Tasks.Queries.GetTasksByProject;
 
 namespace ProjectTask.API.Controllers;
