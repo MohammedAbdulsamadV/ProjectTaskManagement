@@ -7,7 +7,6 @@ ASP.NET Core Web API (.NET 10)
 Clean Architecture
 Entity Framework Core
 SQL Server (Docker)
-Redis (Distributed Cache)
 JWT Authentication
 CQRS Pattern (MediatR optional)
 AutoMapper
@@ -24,7 +23,7 @@ ProjectTask.Infrastructure
 Layers Responsibility:
 Domain → Entities & Core Business Rules
 Application → CQRS, DTOs, Interfaces
-Infrastructure → EF Core, Redis, Repositories
+Infrastructure → EF Core, Repositories
 API → Controllers, Middleware, Swagger
 🔐 Features
 #Authentication
