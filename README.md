@@ -1,6 +1,6 @@
 📌 Project Task Management API
 
-A scalable backend system built with ASP.NET Core Web API (.NET 10) following Clean Architecture, implementing CQRS, JWT Authentication, Redis Caching, and Docker support.
+A scalable backend system built with ASP.NET Core Web API (.NET 10) following Clean Architecture, implementing CQRS, JWT Authentication and Docker support.
 
 🚀 Tech Stack
 ASP.NET Core Web API (.NET 10)
@@ -41,9 +41,6 @@ Create Task
 Update Task Status
 Get Tasks By Project
 Delete Task
-Caching
-Redis caching for optimized performance
-Cached GetTasksByProject query
 📦 API Endpoints
 Auth
 -POST /api/auth/register
@@ -67,7 +64,6 @@ Tasks
 *Global Exception Handling
 *DTO Mapping (AutoMapper)
 🚀 Performance Features
-=Redis Distributed Caching
 =Retry Policy for SQL Server
 =Async/Await everywhere
 =Clean separation of concerns
