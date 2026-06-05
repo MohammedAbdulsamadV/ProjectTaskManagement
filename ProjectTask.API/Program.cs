@@ -14,32 +14,21 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-    var configuration = builder.Configuration;
-
-// ========================
-// 📌 Controllers
-// ========================
-    builder.Services.AddControllers();
-
-// ========================
-// 📌 Swagger
-// ========================
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
-
-// ========================
-// 📌 Application Layer DI
-// ========================
-    builder.Services.AddApplication();
-
-// ========================
-// 📌 Infrastructure Layer DI (EF + Redis + Repos)
-// ========================
-    builder.Services.AddInfrastructure(configuration);
-
-// ========================
-// 📌 Database (if not inside Infrastructure)
-// ========================
+        var configuration = builder.Configuration;
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AngularAppPolicy", policy =>
+            {
+                policy.WithOrigins("http://localhost:4200") 
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            });
+        });
+        builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+        builder.Services.AddApplication();
+        builder.Services.AddInfrastructure(configuration);
         builder.Services.AddDbContext<AppDbContext>(options =>
         {
             options.UseSqlServer(
@@ -52,64 +41,45 @@ public class Program
                         errorNumbersToAdd: null);
                 });
         });
-// ========================
-// 📌 JWT Authentication
-// ========================
-    var jwtSettings = configuration.GetSection("Jwt");
 
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+        var jwtSettings = configuration.GetSection("Jwt");
 
-            ValidIssuer = jwtSettings["Issuer"],
-            ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSettings["Key"]!)
-            )
-        };
-    });
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
 
-// ========================
-// 📌 Authorization
-// ========================
-builder.Services.AddAuthorization();
+                        ValidIssuer = jwtSettings["Issuer"],
+                        ValidAudience = jwtSettings["Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtSettings["Key"]!)
+                            )
+                    };
+            });
+        builder.Services.AddAuthorization();
+        builder.Services.AddStackExchangeRedisCache(options =>
+                {
+                    options.Configuration = configuration["Redis:Connection"];
+                });
 
-// ========================
-// 📌 Redis (if not inside Infrastructure)
-// ========================
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = configuration["Redis:Connection"];
-});
+        var app = builder.Build();
+        app.UseMiddleware<ExceptionMiddleware>();
 
-var app = builder.Build();
-
-// ========================
-// 📌 Middleware Pipeline
-// ========================
-
-// Global Exception Handling
-app.UseMiddleware<ExceptionMiddleware>();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+        if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+        app.UseCors("AngularAppPolicy");
+        app.UseHttpsRedirection();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.MapControllers();
+        app.Run();
     }
 }

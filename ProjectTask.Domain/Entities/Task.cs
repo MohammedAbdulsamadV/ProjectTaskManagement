@@ -13,4 +13,6 @@ public class Task : BaseEntity
     public TaskPriority Priority { get; set; }
     
     public int ProjectId { get; set; }
-    public Project Project { get; set; } = null!;}
+    public Project Project { get; set; } = null!;
+    
+}
