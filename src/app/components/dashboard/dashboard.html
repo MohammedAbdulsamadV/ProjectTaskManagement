@@ -1,0 +1,128 @@
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h2>Projects</h2>
+      <button class="btn-logout" (click)="logout()">Logout</button>
+    </div>
+
+    <div class="add-box">
+      <div class="form-group">
+        <label>Project Name</label>
+        <input type="text" name="projectName" [(ngModel)]="newProject.name" required #nameCtrl="ngModel">
+        <small class="error-text" *ngIf="nameCtrl.invalid && nameCtrl.touched">
+          * Project Name is required.
+        </small>  
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" name="projectDescription" [(ngModel)]="newProject.description" required #descCtrl="ngModel">
+        <small class="error-text" *ngIf="descCtrl.invalid && descCtrl.touched">
+          * Description is required.
+        </small>
+      </div>
+      <button type="button" class="btn-primary" (click)="addProject()" [disabled]="nameCtrl.invalid || descCtrl.invalid">
+        + Add Project
+      </button>
+    </div>
+
+    <ul class="item-list">
+      <li *ngFor="let p of projects" [class.active]="selectedProject?.id === p.id" (click)="selectProject(p)">
+        
+        <div *ngIf="editingProjectId !== p.id" class="project-view">
+          <div>
+            <strong>{{ p.name }}</strong>
+            <p>{{ p.description }}</p>
+          </div>
+          <div class="action-buttons">
+            <button class="btn-icon edit" (click)="startEditProject(p, $event)">✏️</button>
+            <button class="btn-icon delete" (click)="deleteProject(p.id, $event)">🗑️</button>
+          </div>
+        </div>
+
+        <div *ngIf="editingProjectId === p.id" class="project-edit">
+          <input type="text" [(ngModel)]="editProjectData.name" (click)="$event.stopPropagation()">
+          <input type="text" [(ngModel)]="editProjectData.description" (click)="$event.stopPropagation()">
+          <button class="btn-save" (click)="saveProject(p.id, $event)">Save</button>
+          <button class="btn-cancel" (click)="editingProjectId = null; $event.stopPropagation()">Cancel</button>
+        </div>
+
+      </li>
+    </ul>
+  </aside>
+
+  <main class="main-content">
+    <div *ngIf="!selectedProject" class="empty-state">
+      <h3>Select a project to view tasks.</h3>
+    </div>
+
+    <div *ngIf="selectedProject">
+      <h2>{{ selectedProject.name }} - Tasks</h2>
+
+      <div class="add-task-container">
+        <div class="form-group">
+          <label>Task Title</label>
+          <input type="text" name="taskTitle" [(ngModel)]="newTask.title" required #titleCtrl="ngModel">
+          <small class="error-text" *ngIf="titleCtrl.invalid && titleCtrl.touched">
+            * Task Title is required.
+          </small>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" name="taskDescription" [(ngModel)]="newTask.description" required #taskDescCtrl="ngModel">
+          <small class="error-text" *ngIf="taskDescCtrl.invalid && (taskDescCtrl.touched || taskDescCtrl.dirty)">
+            * Description is required.
+          </small>
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" name="taskDueDate" [(ngModel)]="newTask.dueDate" required #dateCtrl="ngModel">
+          <small class="error-text" *ngIf="dateCtrl.invalid && dateCtrl.touched">
+            * Due Date is required.
+          </small>
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select name="taskPriority" [(ngModel)]="newTask.priority" required #priorityCtrl="ngModel">
+            <option [ngValue]="0">Low</option>
+            <option [ngValue]="1">Medium</option>
+            <option [ngValue]="2">High</option>
+          </select>
+          <small class="error-text" *ngIf="priorityCtrl.invalid && priorityCtrl.touched">
+            * Priority is required.
+          </small>
+        </div>
+        <div class="form-group btn-group">
+          <label>&nbsp;</label>
+          <button type="button" class="btn-primary" (click)="addTask()" [disabled]="titleCtrl.invalid || taskDescCtrl.invalid || dateCtrl.invalid || priorityCtrl.invalid">
+            + Add Task
+          </button>
+        </div>
+      </div>
+
+      <div class="task-grid">
+        <div class="task-card" *ngFor="let t of tasks; trackBy: trackByTaskId">
+          <div class="task-info">
+            <h4>
+              {{ t.title }} 
+              <span class="badge" [ngClass]="'priority-' + getPriorityLabel(t.priority).toLowerCase()">{{ getPriorityLabel(t.priority) }}</span>
+            </h4>
+            <p>{{ t.description }}</p>
+            <small>Due: {{ t.dueDate }}</small>
+          </div>
+          
+          <div class="task-actions">
+            <div class="task-header-actions">
+              <span class="status-label">Status: {{ t.status }}</span>
+              <button class="btn-icon delete-task" (click)="deleteTask(t.id)">🗑️</button>
+            </div>
+            <div class="status-buttons">
+              <button type="button" (click)="changeTaskStatus(t.id, 0)">To Do</button>
+              <button type="button" (click)="changeTaskStatus(t.id, 1)">In Progress</button>
+              <button type="button" (click)="changeTaskStatus(t.id, 2)">Done</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

@@ -1,0 +1,65 @@
+/* Layout & Basics */
+.dashboard-layout { display: flex; height: 100vh; font-family: sans-serif; }
+.sidebar { width: 350px; background: #f4f6f8; padding: 20px; border-right: 1px solid #ddd; overflow-y: auto; }
+.main-content { flex: 1; padding: 30px; background: #fff; overflow-y: auto; }
+
+/* Form Groups & Labels */
+.form-group { display: flex; flex-direction: column; margin-bottom: 12px; }
+.form-group label { font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px; }
+.form-group input, .form-group select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+
+/* Buttons */
+.btn-primary { background: #007bff; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; }
+.btn-logout { background: #ff4d4f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+
+/* Projects List */
+.item-list { list-style: none; padding: 0; margin-top: 20px; }
+.item-list li { background: white; padding: 15px; border-radius: 6px; margin-bottom: 10px; cursor: pointer; border: 1px solid #eee; position: relative; }
+.item-list li.active { border-color: #007bff; box-shadow: 0 0 5px rgba(0,123,255,0.3); }
+
+/* Project Actions */
+.project-view { display: flex; justify-content: space-between; align-items: flex-start; }
+.action-buttons { display: flex; gap: 5px; }
+.btn-icon { background: none; border: none; cursor: pointer; font-size: 14px; opacity: 0.6; }
+.btn-icon:hover { opacity: 1; }
+
+/* Project Edit Mode */
+.project-edit { display: flex; flex-direction: column; gap: 5px; }
+.project-edit input { padding: 5px; border: 1px solid #ccc; border-radius: 3px; }
+.btn-save { background: #28a745; color: white; border: none; padding: 5px; border-radius: 3px; cursor: pointer; }
+.btn-cancel { background: #6c757d; color: white; border: none; padding: 5px; border-radius: 3px; cursor: pointer; }
+
+/* Task Container */
+.add-task-container { display: flex; gap: 15px; background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px; align-items: flex-end; flex-wrap: wrap; }
+.add-task-container .form-group { flex: 1; min-width: 150px; margin-bottom: 0; }
+.btn-group { flex: 0.5; min-width: 100px; }
+
+/* Task Grid & Cards */
+.task-grid { display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.task-card { background: #fff; border: 1px solid #e0e0e0; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; gap: 15px; }
+.task-info h4 { margin: 0 0 8px; display: flex; align-items: center; justify-content: space-between;}
+.task-info p { color: #666; margin: 0 0 10px; font-size: 14px; }
+.badge { padding: 3px 8px; font-size: 11px; border-radius: 12px; color: white; }
+.priority-low { background: #28a745; }
+.priority-medium { background: #ffc107; color: #000; }
+.priority-high { background: #dc3545; }
+
+/* Task Actions */
+.task-header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.status-label { font-weight: bold; font-size: 13px; color: #444; }
+.status-buttons { display: flex; gap: 5px; justify-content: center; }
+.status-buttons button { flex: 1; background: #e9ecef; border: 1px solid #ced4da; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; }
+.status-buttons button:hover { background: #dee2e6; }
+
+.error-text {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block;
+  font-weight: 500;
+}
+
+input.ng-invalid.ng-touched {
+  border-color: #dc3545;
+  outline: none;
+}

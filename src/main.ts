@@ -1,6 +1,7 @@
+import 'zone.js'; // 👈 حط السطر ده هنا فوق خالص
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
-import { App } from './app/app';
+import { AppComponent } from './app/app';
 
-bootstrapApplication(App, appConfig)
+bootstrapApplication(AppComponent, appConfig)
   .catch((err) => console.error(err));
