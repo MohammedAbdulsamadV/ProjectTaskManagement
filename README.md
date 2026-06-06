@@ -1,59 +1,60 @@
 # ProjectTaskManagement
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.0.
+This repository contains a full Project Task Management system with two parts:
 
-## Development server
+- Frontend: an Angular application generated with Angular CLI.
+- Backend: an ASP.NET Core Web API (Clean Architecture) with CQRS, JWT authentication, and Docker support.
 
-To start a local development server, run:
+## Frontend (Angular)
+
+Development server
 
 ```bash
+cd <frontend-folder-or-root>
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Open http://localhost:4200/ when the server is running. The application reloads on source changes.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+Build
 
 ```bash
 ng build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Run unit tests
 
 ```bash
 ng test
 ```
 
-## Running end-to-end tests
+## Backend (ASP.NET Core Web API)
 
-For end-to-end (e2e) testing, run:
+A scalable backend built with .NET 10 using Clean Architecture and EF Core.
 
-```bash
-ng e2e
-```
+Tech stack and features:
+- ASP.NET Core Web API (.NET 10)
+- Clean Architecture (API, Application, Domain, Infrastructure)
+- Entity Framework Core
+- SQL Server (Docker)
+- JWT Authentication
+- CQRS pattern
+- AutoMapper
+- Swagger / OpenAPI
+- Docker & Docker Compose
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+API Endpoints (examples)
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/projects`
+- `POST /api/projects`
+- `GET /api/tasks/project/{projectId}`
 
-## Additional Resources
+## Development
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Backend: open the solution in Visual Studio / Rider / VS Code. Use `dotnet run` or Docker Compose.
+- Frontend: run `ng serve` in the Angular project folder.
+
+## Notes
+
+This combined repository now contains both frontend and backend source trees. See the relevant subfolders for more details and README files specific to each part.
